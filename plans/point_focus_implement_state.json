@@ -1,0 +1,25 @@
+{
+  "feature": "point_focus",
+  "description": "macOS menu bar app: warp cursor to focused window's (configurable, per-app) focus point on Cmd+Tab. SwiftUI settings + screenshot-style per-app point picker with edge-to-edge crosshair.",
+  "mode": "managed",
+  "created": "2026-04-19T16:20:52Z",
+  "updated": "2026-04-19T16:20:52Z",
+  "base_commit": "8f9246fab20fb2a37986c64443f885c7f3e6b0d7",
+  "assumptions_confirmed": {
+    "app_type": "menu bar (LSUIElement)",
+    "build": "SwiftPM + build.sh → ~/Applications/PointFocus.app",
+    "trigger": "Cmd+Tab only (V1)",
+    "point_picker": "raise target app, edge-to-edge crosshair overlay follows cursor, click stores relative (x,y) in [0,1]",
+    "persistence": "UserDefaults keyed by bundle identifier",
+    "global_default": "configurable via settings (default: center 0.5,0.5)",
+    "toggle": "menu bar icon + settings checkbox",
+    "permissions": "first-run onboarding for Accessibility + Input Monitoring"
+  },
+  "phases": {
+    "feature_forge":    { "status": "done", "artifact": "specs/point_focus.spec.md", "prompt_artifact": "specs/point_focus.prompt.md", "completed_at": "2026-04-19T16:28:00Z" },
+    "agent_plan":       { "status": "done", "artifact": "plans/point_focus_agent_plan.md", "completed_at": "2026-04-19T16:33:00Z" },
+    "execute_waves":    { "status": "pending", "artifact": null },
+    "review_gauntlet":  { "status": "pending", "artifact": null }
+  },
+  "current_phase": "agent_plan"
+}
