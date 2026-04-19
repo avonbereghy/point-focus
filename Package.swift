@@ -8,6 +8,11 @@ let package = Package(
         .executableTarget(
             name: "PointFocus",
             path: "Sources/PointFocus"
+        ),
+        .testTarget(
+            name: "PointFocusTests",
+            dependencies: ["PointFocus"],
+            path: "Tests/PointFocusTests"
         )
     ]
 )
