@@ -26,17 +26,16 @@ final class PickerCoordinator {
     }
 
     func pick(bundleID: String) async -> Bool {
-        if NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).isEmpty {
+        var running = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).first
+        if running == nil {
             guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else { return false }
             do {
-                _ = try await NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
+                running = try await NSWorkspace.shared.openApplication(at: url, configuration: NSWorkspace.OpenConfiguration())
             } catch {
                 return false
             }
         }
-        if let app = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).first {
-            app.activate(options: [.activateAllWindows])
-        }
+        running?.activate(options: [.activateAllWindows])
         let deadline = Date().addingTimeInterval(5.0)
         var r: FocusedWindowProbe.Result? = nil
         while Date() < deadline {

@@ -9,14 +9,6 @@ final class PickerOverlayView: NSView {
     override var acceptsFirstResponder: Bool { true }
     override var isFlipped: Bool { false }
 
-    override init(frame frameRect: NSRect) {
-        super.init(frame: frameRect)
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
         trackingAreas.forEach { removeTrackingArea($0) }

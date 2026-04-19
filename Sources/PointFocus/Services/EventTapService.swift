@@ -13,25 +13,19 @@ final class EventTapService {
 
     private var tap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
-    private var continuation: AsyncStream<Event>.Continuation?
-    private var stream: AsyncStream<Event>?
+    private let continuation: AsyncStream<Event>.Continuation
+    let events: AsyncStream<Event>
 
     private var cmdIsDown: Bool = false
     private var tabPending: Bool = false
 
-    init() {}
-
-    var events: AsyncStream<Event> {
-        if let stream { return stream }
-        let (s, c) = AsyncStream.makeStream(of: Event.self)
-        self.stream = s
-        self.continuation = c
-        return s
+    init() {
+        let (stream, continuation) = AsyncStream.makeStream(of: Event.self)
+        self.events = stream
+        self.continuation = continuation
     }
 
     func start() throws {
-        _ = events
-
         let mask: CGEventMask =
             (1 << CGEventType.keyDown.rawValue) |
             (1 << CGEventType.flagsChanged.rawValue)
@@ -76,7 +70,7 @@ final class EventTapService {
         cmdIsDown = cmdDown
         if wasDown && !cmdDown && tabPending {
             tabPending = false
-            continuation?.yield(.cmdTabReleased)
+            continuation.yield(.cmdTabReleased)
         }
     }
 
