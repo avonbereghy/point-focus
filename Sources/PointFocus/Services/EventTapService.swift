@@ -28,7 +28,9 @@ final class EventTapService {
     func start() throws {
         let mask: CGEventMask =
             (1 << CGEventType.keyDown.rawValue) |
-            (1 << CGEventType.flagsChanged.rawValue)
+            (1 << CGEventType.flagsChanged.rawValue) |
+            (1 << CGEventType.tapDisabledByTimeout.rawValue) |
+            (1 << CGEventType.tapDisabledByUserInput.rawValue)
 
         let refcon = Unmanaged.passUnretained(self).toOpaque()
 
@@ -54,15 +56,20 @@ final class EventTapService {
     func stop() {
         if let tap {
             CGEvent.tapEnable(tap: tap, enable: false)
+            CFMachPortInvalidate(tap)
         }
         if let source = runLoopSource {
             CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes)
         }
-        if let tap {
-            CFMachPortInvalidate(tap)
-        }
         runLoopSource = nil
         tap = nil
+        continuation.finish()
+    }
+
+    fileprivate func reenableTap() {
+        if let tap {
+            CGEvent.tapEnable(tap: tap, enable: true)
+        }
     }
 
     fileprivate func handleFlagsChanged(cmdDown: Bool) {
@@ -106,6 +113,14 @@ private func eventTapCallback(
                 guard let raw = UnsafeMutableRawPointer(bitPattern: bits) else { return }
                 let service = Unmanaged<EventTapService>.fromOpaque(raw).takeUnretainedValue()
                 service.handleKeyDown(keycode: keycode)
+            }
+        }
+    case .tapDisabledByTimeout, .tapDisabledByUserInput:
+        DispatchQueue.main.async {
+            MainActor.assumeIsolated {
+                guard let raw = UnsafeMutableRawPointer(bitPattern: bits) else { return }
+                let service = Unmanaged<EventTapService>.fromOpaque(raw).takeUnretainedValue()
+                service.reenableTap()
             }
         }
     default:
