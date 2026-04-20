@@ -7,6 +7,20 @@ A tiny macOS menu-bar utility that warps the mouse cursor to a configurable poin
 - Menu-bar toggle to pause/resume.
 - Optional launch at login.
 
+## Tech stack
+
+- **Language** — Swift 6 (strict concurrency, `@MainActor`, `@Observable`)
+- **Build** — Swift Package Manager, universal binary (arm64 + x86_64)
+- **UI** — SwiftUI (settings popover, onboarding, picker overlay) over AppKit (`NSStatusItem`, `NSPopover`, borderless `NSWindow`)
+- **Input capture** — `CGEventTap` on `.cghidEventTap` (falls back to `.cgSessionEventTap`) watching `keyDown` + `flagsChanged`
+- **Focused-window probe** — Accessibility API (`AXUIElementCreateSystemWide`, `kAXFocusedApplication`, `kAXFocusedWindow` / `kAXMainWindow`), with `NSWorkspace.frontmostApplication` as a fallback
+- **Cursor control** — `CGWarpMouseCursorPosition` + `CGAssociateMouseAndMouseCursorPosition`, with multi-display clamping (Quartz top-left ↔ NSScreen bottom-left conversion)
+- **Persistence** — `UserDefaults` (single JSON blob, debounced writes)
+- **Launch at login** — `SMAppService.mainApp` (macOS 13+)
+- **Logging** — `os.Logger` (subsystem `com.avb.pointfocus`)
+- **Signing** — self-signed local code-signing cert (generated on first `./build.sh` run) so the CDHash stays stable across rebuilds and TCC grants persist
+- **Tests** — Swift Testing + XCTest
+
 ## Requirements
 
 - macOS 14 (Sonoma) or later.
