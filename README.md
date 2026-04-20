@@ -25,18 +25,23 @@ Produces `build/PointFocus.app` and installs it to `~/Applications/PointFocus.ap
 ## First run
 
 1. Launch `~/Applications/PointFocus.app`.
-2. A setup window will appear listing the two required permissions. Click **Open System Settings** for each, toggle PointFocus on, then return to the app — the window auto-dismisses once both are granted.
+2. An onboarding window lists the two required permissions. Click **Grant…** for each — macOS shows its native prompt and routes you to **System Settings → Privacy & Security**. Toggle PointFocus on, then return to the app; the window auto-dismisses once both are granted.
 3. A `scope` icon appears in the menu bar.
 
 ## Usage
 
-- **Cmd+Tab** as you normally would. The cursor lands on the configured point of the window you switched to.
-- **Left-click** the menu-bar icon to pause/resume.
-- **Right-click** (or Option-click) the menu-bar icon for a menu with settings, launch-at-login, quit.
-- In **Settings…**:
+- **Cmd+Tab** as you normally would — the cursor lands on the configured point of the window you switched to.
+- **Click** the menu-bar icon to open the settings popover. Everything lives here:
+  - Toggle PointFocus on/off.
   - Edit the global default `(x, y)` directly, or click **Pick on screen…** to set it visually.
   - Click **Add app…** to pick an app from `/Applications` and assign a per-app focus point. The picker overlays the target app's focused window with a translucent tint and a live edge-to-edge crosshair — click anywhere to save, Esc to cancel.
   - Per-app rows let you **Re-pick** or **Remove** an override at any time.
+  - Launch-at-login checkbox.
+
+## Known limitations
+
+- Apps that don't register with macOS's standard focus APIs (some Rust/Tauri menu-bar utilities) are invisible to the AX system-wide focused-window query and can't be targeted without Screen Recording permission, which PointFocus doesn't currently request.
+- Only `Cmd`-held switching is handled; Mission Control and Spaces transitions are out of scope for V1.
 
 ## Uninstall
 
