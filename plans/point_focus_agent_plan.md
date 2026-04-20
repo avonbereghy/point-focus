@@ -269,7 +269,7 @@ Files you modify: NONE (no existing Swift files yet).
 Files you do NOT touch: anything else.
 
 Verify:
-  cd  && swift build 2>&1 | tail -20
+  swift build 2>&1 | tail -20
   Expected: "Build complete!" with 0 errors. Warnings acceptable.
   (Expect unresolved-symbol errors only if you accidentally referenced Wave 1 types — if so, remove the reference.)
 ```
