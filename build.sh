@@ -32,25 +32,29 @@ if ! security find-identity -v -p codesigning | grep -q "\"${CERT_NAME}\""; then
         -addext "basicConstraints=critical,CA:false" 2>/dev/null
 
     # macOS `security` uses the older PKCS12 format; force legacy ciphers + a
-    # non-empty passphrase so SecKeychainItemImport's MAC check succeeds.
-    P12_PASS="pointfocus"
+    # non-empty passphrase so SecKeychainItemImport's MAC check succeeds. The
+    # passphrase is randomised per-run and passed via file descriptor so it
+    # never appears on the command line (visible to `ps`) or in shell history.
+    printf '%s' "$(openssl rand -hex 16)" > "$WORK/p12pass"
+    chmod 600 "$WORK/p12pass"
     openssl pkcs12 -export \
         -in "$WORK/cert.pem" -inkey "$WORK/key.pem" \
         -out "$WORK/cert.p12" \
-        -passout "pass:${P12_PASS}" \
+        -passout "file:$WORK/p12pass" \
         -name "${CERT_NAME}" \
         -certpbe PBE-SHA1-3DES -keypbe PBE-SHA1-3DES -macalg SHA1
 
     security import "$WORK/cert.p12" \
         -k "${HOME}/Library/Keychains/login.keychain-db" \
-        -P "${P12_PASS}" \
+        -P "$(cat "$WORK/p12pass")" \
         -T /usr/bin/codesign
 
-    # Self-signed certs are not visible to the codesigning policy unless they
-    # carry explicit user-domain trust for code signing. This call prompts
-    # for the login keychain password once.
+    # Self-signed leaf certs need explicit user-domain trust for code signing.
+    # `-r trustAsRoot` trusts this specific leaf for code signing only; it does
+    # NOT install a CA-level anchor (which `-r trustRoot` would, allowing the
+    # private key — if ever extracted — to sign other binaries as "trusted").
     security add-trusted-cert \
-        -r trustRoot \
+        -r trustAsRoot \
         -p codeSign \
         -k "${HOME}/Library/Keychains/login.keychain-db" \
         "$WORK/cert.pem"
