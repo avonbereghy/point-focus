@@ -34,14 +34,26 @@ final class EventTapService {
 
         let refcon = Unmanaged.passUnretained(self).toOpaque()
 
-        guard let tap = CGEvent.tapCreate(
+        // Try .cghidEventTap first (lowest level, events arrive before any
+        // session-level interceptors like Karabiner). Fall back to session
+        // tap if HID isn't available.
+        let tap: CFMachPort? = CGEvent.tapCreate(
+            tap: .cghidEventTap,
+            place: .headInsertEventTap,
+            options: .listenOnly,
+            eventsOfInterest: mask,
+            callback: eventTapCallback,
+            userInfo: refcon
+        ) ?? CGEvent.tapCreate(
             tap: .cgSessionEventTap,
             place: .headInsertEventTap,
             options: .listenOnly,
             eventsOfInterest: mask,
             callback: eventTapCallback,
             userInfo: refcon
-        ) else {
+        )
+        guard let tap else {
+            PFLog.tap.log("CGEvent.tapCreate returned nil for both HID and session taps")
             throw TapError.failedToCreateTap
         }
 

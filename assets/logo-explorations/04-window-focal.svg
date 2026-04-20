@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- 04 · Window Focal — a stylised app window (title bar + three traffic
+       lights) with a focal point at a rule-of-thirds intersection. A faint
+       reticle orbits the point. The most literal mark — reads immediately
+       as "this app decides where, inside a window, your cursor goes." -->
+  <defs>
+    <radialGradient id="bg4" cx="0.3" cy="0.25" r="1.0">
+      <stop offset="0" stop-color="#1a2340"/>
+      <stop offset="1" stop-color="#080b14"/>
+    </radialGradient>
+    <linearGradient id="win4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e2a44"/>
+      <stop offset="1" stop-color="#141b2e"/>
+    </linearGradient>
+    <linearGradient id="titlebar4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a3755"/>
+      <stop offset="1" stop-color="#1c2640"/>
+    </linearGradient>
+    <radialGradient id="focalHalo4" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"   stop-color="#4ac9ff" stop-opacity="0.35"/>
+      <stop offset="0.6" stop-color="#2a8fd8" stop-opacity="0.10"/>
+      <stop offset="1"   stop-color="#2a8fd8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="dot4" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#fff8e6"/>
+      <stop offset="0.22" stop-color="#ffcf72"/>
+      <stop offset="0.55" stop-color="#ff9430" stop-opacity="0.8"/>
+      <stop offset="1"    stop-color="#ff7a20" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="96" fill="url(#bg4)"/>
+
+  <!-- Window shell: rounded rect with a darker interior -->
+  <g>
+    <!-- Body -->
+    <rect x="72" y="108" width="368" height="296" rx="22" fill="url(#win4)"
+          stroke="#3a4a72" stroke-width="1.5"/>
+    <!-- Title bar -->
+    <path d="M 72 130 L 72 108 Q 72 108 94 108 L 418 108 Q 440 108 440 108 L 440 130 Z"
+          fill="url(#titlebar4)"/>
+    <line x1="72" y1="150" x2="440" y2="150" stroke="#0e1628" stroke-width="1.5" opacity="0.8"/>
+    <!-- Traffic lights -->
+    <circle cx="100" cy="129" r="6" fill="#ff5f57" opacity="0.85"/>
+    <circle cx="122" cy="129" r="6" fill="#febc2e" opacity="0.85"/>
+    <circle cx="144" cy="129" r="6" fill="#28c840" opacity="0.85"/>
+  </g>
+
+  <!-- Focal halo behind the dot -->
+  <circle cx="317" cy="303" r="120" fill="url(#focalHalo4)"/>
+
+  <!-- Faint rule-of-thirds guides, clipped inside the window content area -->
+  <g stroke="#4ac9ff" stroke-width="1" opacity="0.22" stroke-dasharray="3 5">
+    <line x1="72"  y1="234" x2="440" y2="234"/>   <!-- y = 152 + 82 -->
+    <line x1="72"  y1="322" x2="440" y2="322"/>   <!-- y = 152 + 170 -->
+    <line x1="195" y1="152" x2="195" y2="404"/>
+    <line x1="317" y1="152" x2="317" y2="404"/>
+  </g>
+
+  <!-- Reticle orbiting the focal point (small scope mark) -->
+  <g fill="none" stroke-linecap="round">
+    <circle cx="317" cy="303" r="52" stroke="#4ac9ff" stroke-width="1.5" opacity="0.75"/>
+    <circle cx="317" cy="303" r="28" stroke="#4ac9ff" stroke-width="1.5"
+            stroke-dasharray="4 6" opacity="0.6"/>
+  </g>
+
+  <!-- Crosshair around the focal, staying within the window area -->
+  <g stroke="#4ac9ff" stroke-width="1.5" stroke-linecap="round" opacity="0.75">
+    <line x1="225" y1="303" x2="293" y2="303"/>
+    <line x1="341" y1="303" x2="409" y2="303"/>
+    <line x1="317" y1="217" x2="317" y2="279"/>
+    <line x1="317" y1="327" x2="317" y2="385"/>
+  </g>
+
+  <!-- Focal point glow + bright core -->
+  <circle cx="317" cy="303" r="22" fill="url(#dot4)"/>
+  <circle cx="317" cy="303" r="5"  fill="#fff8e6"/>
+</svg>

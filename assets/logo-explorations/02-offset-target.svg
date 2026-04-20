@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- 02 · Offset Target — same reticle language as 01 but the focal point is
+       deliberately off-center (~rule-of-thirds). It says: "the point isn't
+       always where you'd expect — you configure it." The inner ring and
+       crosshair re-center on the dot, so the whole composition pivots. -->
+  <defs>
+    <radialGradient id="bg2" cx="0.3" cy="0.25" r="1.0">
+      <stop offset="0" stop-color="#1a2340"/>
+      <stop offset="1" stop-color="#080b14"/>
+    </radialGradient>
+    <radialGradient id="halo2" cx="0.66" cy="0.66" r="0.5">
+      <stop offset="0" stop-color="#4ac9ff" stop-opacity="0.18"/>
+      <stop offset="0.7" stop-color="#2a8fd8" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#2a8fd8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ring2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7fdbff"/>
+      <stop offset="1" stop-color="#2480be"/>
+    </linearGradient>
+    <linearGradient id="cross2h" x1="0" y1="0.5" x2="1" y2="0.5">
+      <stop offset="0"   stop-color="#2480be" stop-opacity="0"/>
+      <stop offset="0.3" stop-color="#4ac9ff" stop-opacity="0.85"/>
+      <stop offset="0.7" stop-color="#4ac9ff" stop-opacity="0.85"/>
+      <stop offset="1"   stop-color="#2480be" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="cross2v" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0"   stop-color="#2480be" stop-opacity="0"/>
+      <stop offset="0.3" stop-color="#4ac9ff" stop-opacity="0.85"/>
+      <stop offset="0.7" stop-color="#4ac9ff" stop-opacity="0.85"/>
+      <stop offset="1"   stop-color="#2480be" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="dot2" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#fff8e6"/>
+      <stop offset="0.22" stop-color="#ffcf72"/>
+      <stop offset="0.55" stop-color="#ff9430" stop-opacity="0.75"/>
+      <stop offset="1"    stop-color="#ff7a20" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="96" fill="url(#bg2)"/>
+  <rect width="512" height="512" rx="96" fill="url(#halo2)"/>
+
+  <!-- Faint rule-of-thirds grid -->
+  <g stroke="#4ac9ff" stroke-width="1" opacity="0.15">
+    <line x1="64"  y1="171" x2="448" y2="171"/>
+    <line x1="64"  y1="341" x2="448" y2="341"/>
+    <line x1="171" y1="64"  x2="171" y2="448"/>
+    <line x1="341" y1="64"  x2="341" y2="448"/>
+  </g>
+
+  <!-- Outer ring: a 270° arc opening toward the focal point, suggesting the
+       reticle "swung" to follow. Center at the focal point (341, 341) -->
+  <circle cx="341" cy="341" r="150" fill="none" stroke="url(#ring2)"
+          stroke-width="4" stroke-linecap="round"
+          stroke-dasharray="510 200" stroke-dashoffset="130"/>
+
+  <!-- Middle dashed ring at focal point -->
+  <circle cx="341" cy="341" r="96" fill="none" stroke="#4ac9ff"
+          stroke-width="1.5" stroke-dasharray="5 9" opacity="0.5"/>
+
+  <!-- Inner lock ring -->
+  <circle cx="341" cy="341" r="44" fill="none" stroke="url(#ring2)" stroke-width="3"/>
+
+  <!-- Crosshair passing through the focal point -->
+  <g stroke-width="2.5" stroke-linecap="round" fill="none">
+    <line x1="40"  y1="341" x2="285" y2="341" stroke="url(#cross2h)"/>
+    <line x1="397" y1="341" x2="472" y2="341" stroke="url(#cross2h)"/>
+    <line x1="341" y1="40"  x2="341" y2="285" stroke="url(#cross2v)"/>
+    <line x1="341" y1="397" x2="341" y2="472" stroke="url(#cross2v)"/>
+  </g>
+
+  <!-- Ghost point at center (the "default" 0.5,0.5) — dimmed, to show we moved -->
+  <circle cx="256" cy="256" r="6" fill="#4ac9ff" opacity="0.28"/>
+  <line x1="262" y1="262" x2="328" y2="328" stroke="#4ac9ff"
+        stroke-width="1" opacity="0.25" stroke-dasharray="3 4"/>
+
+  <!-- Focal glow + bright core at (341, 341) -->
+  <circle cx="341" cy="341" r="34" fill="url(#dot2)"/>
+  <circle cx="341" cy="341" r="6"  fill="#fff8e6"/>
+</svg>

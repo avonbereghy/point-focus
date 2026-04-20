@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- 05 · Aperture — an iris of six blades converging on a bright focal
+       point. Photography-lens metaphor: sharpness concentrated at a single
+       coordinate. The blades carry a cyan-to-deeper-cyan gradient so the
+       iris feels metallic and the center feels hot. -->
+  <defs>
+    <radialGradient id="bg5" cx="0.3" cy="0.25" r="1.0">
+      <stop offset="0" stop-color="#1a2340"/>
+      <stop offset="1" stop-color="#060912"/>
+    </radialGradient>
+    <radialGradient id="halo5" cx="0.5" cy="0.5" r="0.52">
+      <stop offset="0"   stop-color="#ffcf72" stop-opacity="0.18"/>
+      <stop offset="0.35" stop-color="#4ac9ff" stop-opacity="0.10"/>
+      <stop offset="1"   stop-color="#2a8fd8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="blade5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a5a82"/>
+      <stop offset="0.55" stop-color="#1f3558"/>
+      <stop offset="1" stop-color="#0e1830"/>
+    </linearGradient>
+    <linearGradient id="bladeEdge5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7fdbff" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#2480be" stop-opacity="0.2"/>
+    </linearGradient>
+    <radialGradient id="dot5" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0"    stop-color="#fff8e6"/>
+      <stop offset="0.22" stop-color="#ffcf72"/>
+      <stop offset="0.6"  stop-color="#ff9430" stop-opacity="0.82"/>
+      <stop offset="1"    stop-color="#ff7a20" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="96" fill="url(#bg5)"/>
+  <rect width="512" height="512" rx="96" fill="url(#halo5)"/>
+
+  <!-- Six-blade aperture. Each blade is a curved triangle rotated around
+       the center. Drawn as one path then rotated 60° five times. -->
+  <g transform="translate(256 256)">
+    <g stroke="url(#bladeEdge5)" stroke-width="1.2" stroke-linejoin="round">
+      <!-- Blade template — a scalene quad that meets at the center aperture. -->
+      <path d="M 0 -180 L 156 -90 L 48 36 L -40 0 Z" fill="url(#blade5)"/>
+      <path d="M 0 -180 L 156 -90 L 48 36 L -40 0 Z" fill="url(#blade5)" transform="rotate(60)"/>
+      <path d="M 0 -180 L 156 -90 L 48 36 L -40 0 Z" fill="url(#blade5)" transform="rotate(120)"/>
+      <path d="M 0 -180 L 156 -90 L 48 36 L -40 0 Z" fill="url(#blade5)" transform="rotate(180)"/>
+      <path d="M 0 -180 L 156 -90 L 48 36 L -40 0 Z" fill="url(#blade5)" transform="rotate(240)"/>
+      <path d="M 0 -180 L 156 -90 L 48 36 L -40 0 Z" fill="url(#blade5)" transform="rotate(300)"/>
+    </g>
+  </g>
+
+  <!-- Outer rim: a subtle circle framing the iris -->
+  <circle cx="256" cy="256" r="188" fill="none" stroke="#4ac9ff"
+          stroke-width="1.2" opacity="0.35"/>
+  <circle cx="256" cy="256" r="182" fill="none" stroke="#0b1020" stroke-width="1"/>
+
+  <!-- Inner opening highlight (thin ring) -->
+  <circle cx="256" cy="256" r="52" fill="none" stroke="#7fdbff"
+          stroke-width="1.3" opacity="0.6"/>
+
+  <!-- Hot focal point through the iris -->
+  <circle cx="256" cy="256" r="50" fill="url(#dot5)"/>
+  <circle cx="256" cy="256" r="9"  fill="#fff8e6"/>
+
+  <!-- Six tiny sparkle dots at the blade joints (like lens-flare cues) -->
+  <g fill="#a4e5ff" opacity="0.7">
+    <circle cx="256"    cy="96"    r="1.8"/>
+    <circle cx="394.56" cy="176"   r="1.8"/>
+    <circle cx="394.56" cy="336"   r="1.8"/>
+    <circle cx="256"    cy="416"   r="1.8"/>
+    <circle cx="117.44" cy="336"   r="1.8"/>
+    <circle cx="117.44" cy="176"   r="1.8"/>
+  </g>
+</svg>

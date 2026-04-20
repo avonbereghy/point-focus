@@ -1,30 +1,65 @@
 import AppKit
 import Observation
+import SwiftUI
 
 @MainActor
 final class MenuBarController: NSObject {
     private let store: SettingsStore
     private let perms: PermissionsService
     private let launch: LaunchAtLoginService
-    private let onShowSettings: () -> Void
+    private let picker: PickerCoordinator
     private let onShowOnboarding: () -> Void
-    private let onQuit: () -> Void
     private let statusItem: NSStatusItem
+    private let popover: NSPopover
+    private let hostingController: NSHostingController<SettingsView>
+    private static let popoverSize = NSSize(width: 440, height: 500)
 
     init(store: SettingsStore,
          perms: PermissionsService,
          launch: LaunchAtLoginService,
-         onShowSettings:   @escaping () -> Void,
-         onShowOnboarding: @escaping () -> Void,
-         onQuit:           @escaping () -> Void) {
+         picker: PickerCoordinator,
+         onShowOnboarding: @escaping () -> Void) {
         self.store = store
         self.perms = perms
         self.launch = launch
-        self.onShowSettings = onShowSettings
+        self.picker = picker
         self.onShowOnboarding = onShowOnboarding
-        self.onQuit = onQuit
         self.statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        self.popover = NSPopover()
+
+        // Hosting controller + SettingsView are built ONCE and reused. The
+        // dismiss/onboarding callbacks need self, so we defer wiring them
+        // below super.init() via the closure-swap pattern.
+        let initialView = SettingsView(
+            store: store,
+            perms: perms,
+            picker: picker,
+            launch: launch
+        )
+        self.hostingController = NSHostingController(rootView: initialView)
+        self.hostingController.preferredContentSize = Self.popoverSize
         super.init()
+
+        // Now that `self` is available, rebuild the root view with callbacks.
+        self.hostingController.rootView = SettingsView(
+            store: store,
+            perms: perms,
+            picker: picker,
+            launch: launch,
+            onDismiss: { [weak self] in self?.popover.performClose(nil) },
+            onShowOnboarding: { [weak self] in
+                self?.popover.performClose(nil)
+                self?.onShowOnboarding()
+            }
+        )
+
+        self.popover.behavior = .transient
+        self.popover.animates = false
+        self.popover.contentViewController = self.hostingController
+        self.popover.contentSize = Self.popoverSize
+
+        // Pre-warm the SwiftUI view hierarchy so the first click is instant.
+        _ = self.hostingController.view
 
         if let button = statusItem.button {
             button.target = self
@@ -37,96 +72,38 @@ final class MenuBarController: NSObject {
     }
 
     @objc private func onClick(_ sender: Any?) {
-        let event = NSApp.currentEvent
-        let isRightClick = event?.type == .rightMouseUp
-        let optionHeld = event?.modifierFlags.contains(.option) == true
-        if isRightClick || optionHeld {
-            showMenu()
-        } else {
-            store.update { $0.enabled.toggle() }
+        togglePopover()
+    }
+
+    private func togglePopover() {
+        if popover.isShown {
+            popover.performClose(nil)
+            return
         }
-    }
-
-    private func showMenu() {
-        let menu = NSMenu()
-
-        let enabledItem = NSMenuItem(title: "Enabled",
-                                     action: #selector(toggleEnabled),
-                                     keyEquivalent: "")
-        enabledItem.target = self
-        enabledItem.state = store.settings.enabled ? .on : .off
-        menu.addItem(enabledItem)
-
-        let settingsItem = NSMenuItem(title: "Settings…",
-                                      action: #selector(showSettings),
-                                      keyEquivalent: ",")
-        settingsItem.target = self
-        menu.addItem(settingsItem)
-
-        let launchItem = NSMenuItem(title: "Launch at Login",
-                                    action: #selector(toggleLaunchAtLogin),
-                                    keyEquivalent: "")
-        launchItem.target = self
-        launchItem.state = launch.isEnabled ? .on : .off
-        menu.addItem(launchItem)
-
-        let permissionsMissing = perms.accessibility != .granted || perms.inputMonitoring != .granted
-        if permissionsMissing {
-            menu.addItem(NSMenuItem.separator())
-            let fixItem = NSMenuItem(title: "Fix Permissions…",
-                                     action: #selector(showOnboarding),
-                                     keyEquivalent: "")
-            fixItem.target = self
-            menu.addItem(fixItem)
-        }
-
-        menu.addItem(NSMenuItem.separator())
-
-        let quitItem = NSMenuItem(title: "Quit PointFocus",
-                                  action: #selector(quit),
-                                  keyEquivalent: "q")
-        quitItem.target = self
-        menu.addItem(quitItem)
-
-        statusItem.menu = menu
-        statusItem.button?.performClick(nil)
-        statusItem.menu = nil
-    }
-
-    @objc private func toggleEnabled() {
-        store.update { $0.enabled.toggle() }
-    }
-
-    @objc private func showSettings() {
-        onShowSettings()
-    }
-
-    @objc private func toggleLaunchAtLogin() {
-        try? launch.set(!launch.isEnabled)
-        store.update { $0.launchAtLogin = launch.isEnabled }
-    }
-
-    @objc private func showOnboarding() {
-        onShowOnboarding()
-    }
-
-    @objc private func quit() {
-        onQuit()
+        guard let button = statusItem.button else { return }
+        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
     }
 
     private func refreshIcon() {
         guard let button = statusItem.button else { return }
         let name: String
+        let fallback: String
         if perms.accessibility != .granted || perms.inputMonitoring != .granted {
             name = "exclamationmark.triangle"
-        } else if !store.settings.enabled {
-            name = "scope.slash"
+            fallback = "PF!"
         } else {
-            name = "scope"
+            name = store.settings.enabled ? "scope" : "scope"
+            fallback = "PF"
         }
-        let image = NSImage(systemSymbolName: name, accessibilityDescription: nil)
-        image?.isTemplate = true
-        button.image = image
+        if let image = NSImage(systemSymbolName: name, accessibilityDescription: name) {
+            image.isTemplate = true
+            button.image = image
+            button.title = ""
+        } else {
+            button.image = nil
+            button.title = fallback
+        }
+        button.appearsDisabled = !store.settings.enabled
     }
 
     private func startObservation() {

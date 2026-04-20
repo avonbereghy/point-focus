@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- 01 · Reticle Lock — centered reticle with a warm focal glow at the
+       point of landing. The crosshair passes edge-to-edge (echoing the picker
+       overlay), the outer ring has cardinal gaps, and the center is a hot
+       amber point — the moment the cursor "arrives". -->
+  <defs>
+    <radialGradient id="bg1" cx="0.3" cy="0.25" r="1.0">
+      <stop offset="0" stop-color="#1a2340"/>
+      <stop offset="1" stop-color="#080b14"/>
+    </radialGradient>
+    <radialGradient id="halo1" cx="0.5" cy="0.5" r="0.55">
+      <stop offset="0" stop-color="#4ac9ff" stop-opacity="0.16"/>
+      <stop offset="0.6" stop-color="#2a8fd8" stop-opacity="0.06"/>
+      <stop offset="1" stop-color="#2a8fd8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ring1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7fdbff"/>
+      <stop offset="1" stop-color="#2480be"/>
+    </linearGradient>
+    <linearGradient id="cross1" x1="0" y1="0.5" x2="1" y2="0.5">
+      <stop offset="0" stop-color="#2480be" stop-opacity="0"/>
+      <stop offset="0.3" stop-color="#4ac9ff" stop-opacity="0.9"/>
+      <stop offset="0.7" stop-color="#4ac9ff" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#2480be" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="crossV1" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#2480be" stop-opacity="0"/>
+      <stop offset="0.3" stop-color="#4ac9ff" stop-opacity="0.9"/>
+      <stop offset="0.7" stop-color="#4ac9ff" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#2480be" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="dot1" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fff8e6"/>
+      <stop offset="0.22" stop-color="#ffcf72"/>
+      <stop offset="0.55" stop-color="#ff9430" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#ff7a20" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="96" fill="url(#bg1)"/>
+  <rect x="0" y="0" width="512" height="512" rx="96" fill="url(#halo1)"/>
+
+  <!-- Outer ring with four cardinal gaps where the crosshair passes through.
+       Each arc spans 68° centered on a diagonal, with 22° gaps at N/E/S/W. -->
+  <g fill="none" stroke="url(#ring1)" stroke-width="4" stroke-linecap="round">
+    <!-- NE arc: 22° → 68° (measured from top going clockwise) = angles 22..68 from +Y -->
+    <path d="M 312.79 75.52 A 190 190 0 0 1 436.48 199.21"/>
+    <!-- SE arc: 112° → 158° -->
+    <path d="M 436.48 312.79 A 190 190 0 0 1 312.79 436.48"/>
+    <!-- SW arc: 202° → 248° -->
+    <path d="M 199.21 436.48 A 190 190 0 0 1 75.52 312.79"/>
+    <!-- NW arc: 292° → 338° -->
+    <path d="M 75.52 199.21 A 190 190 0 0 1 199.21 75.52"/>
+  </g>
+
+  <!-- Middle dashed ring -->
+  <circle cx="256" cy="256" r="128" fill="none" stroke="#4ac9ff"
+          stroke-width="1.5" stroke-dasharray="5 9" opacity="0.55"/>
+
+  <!-- Inner ring (the lock) -->
+  <circle cx="256" cy="256" r="56" fill="none" stroke="url(#ring1)" stroke-width="3"/>
+
+  <!-- Crosshair: edge-to-edge, with gaps either side of the center dot -->
+  <g stroke-width="2.5" stroke-linecap="round" fill="none">
+    <line x1="40"  y1="256" x2="188" y2="256" stroke="url(#cross1)"/>
+    <line x1="324" y1="256" x2="472" y2="256" stroke="url(#cross1)"/>
+    <line x1="256" y1="40"  x2="256" y2="188" stroke="url(#crossV1)"/>
+    <line x1="256" y1="324" x2="256" y2="472" stroke="url(#crossV1)"/>
+  </g>
+
+  <!-- Focal glow + bright core -->
+  <circle cx="256" cy="256" r="42" fill="url(#dot1)"/>
+  <circle cx="256" cy="256" r="7"  fill="#fff8e6"/>
+</svg>

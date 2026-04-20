@@ -1,6 +1,6 @@
 import AppKit
 import ApplicationServices
-import IOKit.hid
+import CoreGraphics
 import Observation
 
 enum PermissionState: Sendable {
@@ -16,12 +16,10 @@ final class PermissionsService {
 
     func refreshNow() {
         accessibility = AXIsProcessTrustedWithOptions(nil) ? .granted : .denied
-
-        switch IOHIDCheckAccess(kIOHIDRequestTypeListenEvent) {
-        case kIOHIDAccessTypeGranted: inputMonitoring = .granted
-        case kIOHIDAccessTypeDenied:  inputMonitoring = .denied
-        default:                      inputMonitoring = .unknown
-        }
+        // CGPreflightListenEventAccess() matches what CGEvent.tapCreate actually
+        // observes — IOHIDCheckAccess can disagree, particularly across ad-hoc
+        // rebuilds where CDHashes shift.
+        inputMonitoring = CGPreflightListenEventAccess() ? .granted : .denied
     }
 
     func startPolling() {

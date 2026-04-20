@@ -19,12 +19,32 @@ final class OnboardingWindowController {
             w.title = "PointFocus — Setup"
             w.contentView = NSHostingView(rootView: OnboardingView(perms: perms))
             w.isReleasedWhenClosed = false
-            w.center()
             window = w
+        }
+        if let w = window {
+            centerOnMouseScreen(w)
         }
         window?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         startWatching(perms: perms)
+    }
+
+    private func centerOnMouseScreen(_ w: NSWindow) {
+        // Prefer the screen the mouse is on; fall back to the primary display
+        // (the one at origin (0, 0) on the global screen coordinate space).
+        let mouse = NSEvent.mouseLocation
+        let target = NSScreen.screens.first(where: { $0.frame.contains(mouse) })
+            ?? NSScreen.screens.first(where: { $0.frame.origin == .zero })
+            ?? NSScreen.main
+            ?? NSScreen.screens.first
+        guard let screen = target else { return }
+        let vf = screen.visibleFrame
+        let frame = w.frame
+        let origin = NSPoint(
+            x: vf.minX + (vf.width  - frame.width)  / 2,
+            y: vf.minY + (vf.height - frame.height) / 2
+        )
+        w.setFrameTopLeftPoint(NSPoint(x: origin.x, y: origin.y + frame.height))
     }
 
     private func startWatching(perms: PermissionsService) {

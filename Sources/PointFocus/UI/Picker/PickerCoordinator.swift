@@ -43,7 +43,7 @@ final class PickerCoordinator {
                 r = cur
                 break
             }
-            try? await Task.sleep(nanoseconds: 150_000_000)
+            try? await Task.sleep(nanoseconds: 50_000_000)
         }
         guard let probe = r else { return false }
         let click = await runOverlay(frame: probe.frame, observeBundleID: bundleID)

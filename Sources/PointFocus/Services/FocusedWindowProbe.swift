@@ -9,17 +9,29 @@ enum FocusedWindowProbe {
     }
 
     static func current() -> Result? {
+        // Preferred path: system-wide focused app → focused window. Works for
+        // native Cocoa apps.
         let sys = AXUIElementCreateSystemWide()
-
         var appRef: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(sys, kAXFocusedApplicationAttribute as CFString, &appRef) == .success,
-              let appElement = appRef else { return nil }
-        let app = appElement as! AXUIElement
+        if AXUIElementCopyAttributeValue(sys, kAXFocusedApplicationAttribute as CFString, &appRef) == .success,
+           let appElement = appRef {
+            if let r = resolve(app: appElement as! AXUIElement) { return r }
+        }
 
-        var windowRef: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(app, kAXFocusedWindowAttribute as CFString, &windowRef) == .success,
-              let windowElement = windowRef else { return nil }
-        let window = windowElement as! AXUIElement
+        // Fallback: some non-Cocoa apps (Tauri, winit, Electron variants) don't
+        // set kAXFocusedWindow reliably. Ask NSWorkspace which app is frontmost,
+        // then probe its AX element directly. Apps that don't register with
+        // either of these (certain Rust/Tauri apps) are undetectable without
+        // Screen Recording permission — treated as out of scope.
+        if let frontPID = NSWorkspace.shared.frontmostApplication?.processIdentifier {
+            return resolve(app: AXUIElementCreateApplication(frontPID))
+        }
+        return nil
+    }
+
+    private static func resolve(app: AXUIElement) -> Result? {
+        let window = focusedWindow(for: app) ?? mainWindow(for: app) ?? firstWindow(for: app)
+        guard let window else { return nil }
 
         var posRef: CFTypeRef?
         var sizeRef: CFTypeRef?
@@ -37,7 +49,28 @@ enum FocusedWindowProbe {
               let bundleID = NSRunningApplication(processIdentifier: pid)?.bundleIdentifier else {
             return nil
         }
-
         return Result(bundleID: bundleID, frame: CGRect(origin: origin, size: size))
+    }
+
+    private static func focusedWindow(for app: AXUIElement) -> AXUIElement? {
+        var ref: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(app, kAXFocusedWindowAttribute as CFString, &ref) == .success,
+              let element = ref else { return nil }
+        return (element as! AXUIElement)
+    }
+
+    private static func mainWindow(for app: AXUIElement) -> AXUIElement? {
+        var ref: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(app, kAXMainWindowAttribute as CFString, &ref) == .success,
+              let element = ref else { return nil }
+        return (element as! AXUIElement)
+    }
+
+    private static func firstWindow(for app: AXUIElement) -> AXUIElement? {
+        var ref: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(app, kAXWindowsAttribute as CFString, &ref) == .success,
+              let array = ref as? [AXUIElement],
+              let first = array.first else { return nil }
+        return first
     }
 }

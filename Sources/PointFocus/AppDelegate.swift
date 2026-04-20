@@ -18,30 +18,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             OnboardingWindowController.shared.show(perms: perms)
         }
 
-        do {
-            try events.start()
-        } catch {
-            NSLog("PointFocus: failed to start event tap — \(error)")
-        }
+        // Event tap is started by FocusRouter only once Input Monitoring is
+        // confirmed granted — creating it before permission lands leaves the
+        // tap permanently dead for this process.
         router.start()
 
         menuBar = MenuBarController(
             store: store,
             perms: perms,
             launch: launch,
-            onShowSettings: { [unowned self] in
-                SettingsWindowController.shared.show(
-                    store: self.store,
-                    perms: self.perms,
-                    picker: self.picker,
-                    launch: self.launch
-                )
-            },
+            picker: picker,
             onShowOnboarding: { [unowned self] in
                 OnboardingWindowController.shared.show(perms: self.perms)
-            },
-            onQuit: {
-                NSApp.terminate(nil)
             }
         )
     }
