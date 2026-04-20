@@ -92,7 +92,7 @@ final class MenuBarController: NSObject {
             name = "exclamationmark.triangle"
             fallback = "PF!"
         } else {
-            name = store.settings.enabled ? "scope" : "scope"
+            name = "scope"
             fallback = "PF"
         }
         if let image = NSImage(systemSymbolName: name, accessibilityDescription: name) {

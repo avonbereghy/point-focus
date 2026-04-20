@@ -1,5 +1,4 @@
 import AppKit
-import Foundation
 
 @MainActor
 final class PickerCoordinator {
