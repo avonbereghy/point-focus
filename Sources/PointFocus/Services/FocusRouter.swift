@@ -30,8 +30,11 @@ final class FocusRouter {
         withObservationTracking {
             _ = perms.accessibility
             _ = perms.inputMonitoring
-        } onChange: {
-            Task { @MainActor in self.tryStartTap(); self.observePermissions() }
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.tryStartTap()
+                self?.observePermissions()
+            }
         }
         tryStartTap()
     }
