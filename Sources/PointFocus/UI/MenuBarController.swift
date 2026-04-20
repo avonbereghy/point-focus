@@ -111,10 +111,10 @@ final class MenuBarController: NSObject {
             _ = store.settings.enabled
             _ = perms.accessibility
             _ = perms.inputMonitoring
-        } onChange: {
-            Task { @MainActor in
-                self.refreshIcon()
-                self.startObservation()
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in
+                self?.refreshIcon()
+                self?.startObservation()
             }
         }
     }
