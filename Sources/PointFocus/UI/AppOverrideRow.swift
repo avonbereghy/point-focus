@@ -4,16 +4,19 @@ import SwiftUI
 struct AppOverrideRow: View {
     let bundleID: String
     let point: FocusPoint
+    var canRepick: Bool = true
     var onRepick: () -> Void
     var onRemove: () -> Void
 
     var body: some View {
+        let name = displayNameForBundleID(bundleID)
         HStack(spacing: 10) {
             Image(nsImage: iconForBundleID(bundleID))
                 .resizable()
                 .frame(width: 28, height: 28)
+                .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Text(displayNameForBundleID(bundleID))
+                Text(name)
                     .font(.headline)
                 Text(bundleID)
                     .font(.caption)
@@ -22,10 +25,14 @@ struct AppOverrideRow: View {
             Spacer()
             Text(String(format: "x: %.2f  y: %.2f", point.x, point.y))
                 .font(.system(.body, design: .monospaced))
+                .accessibilityLabel(String(format: "Focus point x %.2f, y %.2f", point.x, point.y))
             Button("Re-pick", action: onRepick)
+                .accessibilityLabel("Re-pick focus point for \(name)")
+                .disabled(!canRepick)
             Button(role: .destructive, action: onRemove) {
                 Image(systemName: "trash")
             }
+            .accessibilityLabel("Remove override for \(name)")
         }
     }
 }
