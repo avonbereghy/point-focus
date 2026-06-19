@@ -22,10 +22,17 @@ INSTALL_DIR="${HOME}/Applications"
 if ! security find-identity -v -p codesigning | grep -q "\"${CERT_NAME}\""; then
     echo "==> Creating local code-signing certificate '${CERT_NAME}'"
     WORK=$(mktemp -d)
-    trap "rm -rf '$WORK'" EXIT
+    # Single-quote the trap body so $WORK expands when the trap fires (and is
+    # guarded against being empty), not at registration — a TMPDIR containing a
+    # quote can't break the cleanup into deleting an unintended path.
+    cleanup() { [ -n "${WORK:-}" ] && rm -rf "$WORK"; }
+    trap cleanup EXIT
 
     openssl genrsa -out "$WORK/key.pem" 2048 2>/dev/null
-    openssl req -x509 -new -key "$WORK/key.pem" -out "$WORK/cert.pem" -days 3650 \
+    # 825-day validity bounds how long this standing local-signing key is usable
+    # if the private key is ever extracted; re-run ./build.sh after it expires to
+    # mint a fresh one (delete the old via the `security delete-identity` hint above).
+    openssl req -x509 -new -key "$WORK/key.pem" -out "$WORK/cert.pem" -days 825 \
         -subj "/CN=${CERT_NAME}" \
         -addext "keyUsage=critical,digitalSignature" \
         -addext "extendedKeyUsage=critical,codeSigning" \
@@ -61,8 +68,11 @@ if ! security find-identity -v -p codesigning | grep -q "\"${CERT_NAME}\""; then
 
     if ! security find-identity -v -p codesigning | grep -q "\"${CERT_NAME}\""; then
         echo "error: certificate was imported but is not visible to codesign."
-        echo "       Open Keychain Access > login > Certificates, find '${CERT_NAME}',"
-        echo "       double-click it, expand Trust, and set 'Code Signing' to Always Trust."
+        echo "       Rolling back the partially-provisioned (trusted) identity so it"
+        echo "       isn't left installed; re-run ./build.sh to retry."
+        security remove-trusted-cert "$WORK/cert.pem" 2>/dev/null || true
+        security delete-identity -c "${CERT_NAME}" \
+            "${HOME}/Library/Keychains/login.keychain-db" 2>/dev/null || true
         exit 1
     fi
     echo "==> Certificate '${CERT_NAME}' ready in login keychain."
@@ -78,6 +88,15 @@ if [[ ! -x "${BIN_PATH}" ]]; then
     echo "error: built binary not found at ${BIN_PATH}"
     exit 1
 fi
+
+# Confirm the product is actually universal before we sign and install it — a
+# single-arch binary here would fail only later on the other architecture.
+ARCHS=$(lipo -archs "${BIN_PATH}" 2>/dev/null || echo "")
+if [[ "${ARCHS}" != *arm64* || "${ARCHS}" != *x86_64* ]]; then
+    echo "error: ${BIN_PATH} is not a universal binary (arch: ${ARCHS:-unknown})"
+    exit 1
+fi
+echo "    universal binary OK (${ARCHS})"
 
 # ---------- Step 2: assemble app bundle ----------
 echo "==> Assembling ${APP_BUNDLE}"
