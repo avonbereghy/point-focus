@@ -25,9 +25,16 @@ struct OnboardingView: View {
                 state: perms.inputMonitoring,
                 action: requestInputMonitoring
             )
-            Text("This window will close automatically once both are granted.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            if perms.accessibility == .granted && perms.inputMonitoring == .granted {
+                Label("All set — find PointFocus in your menu bar.", systemImage: "checkmark.circle.fill")
+                    .font(.callout).bold()
+                    .foregroundStyle(.green)
+                    .accessibilityLabel("Setup complete. Find PointFocus in your menu bar.")
+            } else {
+                Text("This window will close automatically once both are granted.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
         .padding(24)
         .frame(width: 460)
@@ -71,20 +78,19 @@ struct OnboardingView: View {
 
     @ViewBuilder
     private func chip(state: PermissionState) -> some View {
-        if state == .granted {
-            Text("Granted")
+        let granted = state == .granted
+        HStack(spacing: 4) {
+            // Shape distinguishes the states without relying on colour alone.
+            Image(systemName: granted ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                .imageScale(.small)
+            Text(granted ? "Granted" : "Not granted")
                 .font(.caption)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(Color.green.opacity(0.2), in: Capsule())
-                .foregroundStyle(.green)
-        } else {
-            Text("Not granted")
-                .font(.caption)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(Color.red.opacity(0.2), in: Capsule())
-                .foregroundStyle(.red)
         }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 4)
+        .background((granted ? Color.green : Color.red).opacity(0.2), in: Capsule())
+        .foregroundStyle(granted ? Color.green : Color.red)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(granted ? "Granted" : "Not granted")
     }
 }

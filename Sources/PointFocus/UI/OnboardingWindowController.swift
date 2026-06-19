@@ -9,22 +9,25 @@ final class OnboardingWindowController {
     private var watchTask: Task<Void, Never>?
 
     func show(perms: PermissionsService) {
-        if window == nil {
-            let w = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 460, height: 360),
-                styleMask: [.titled, .closable],
-                backing: .buffered,
-                defer: false
-            )
+        // Rebuild the hosting controller each show so the passed `perms` always
+        // renders, and let the window adopt the SwiftUI content's fitting size.
+        // The content is ~508pt wide once padding is counted, so the old fixed
+        // 460×360 content rect clipped both the right edge and the lower text.
+        let host = NSHostingController(rootView: OnboardingView(perms: perms))
+        let w: NSWindow
+        if let existing = window {
+            w = existing
+            w.contentViewController = host
+        } else {
+            w = NSWindow(contentViewController: host)
+            w.styleMask = [.titled, .closable]
             w.title = "PointFocus — Setup"
-            w.contentView = NSHostingView(rootView: OnboardingView(perms: perms))
             w.isReleasedWhenClosed = false
             window = w
         }
-        if let w = window {
-            centerOnMouseScreen(w)
-        }
-        window?.makeKeyAndOrderFront(nil)
+        w.setContentSize(host.view.fittingSize)
+        centerOnMouseScreen(w)
+        w.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
         startWatching(perms: perms)
     }
@@ -50,13 +53,41 @@ final class OnboardingWindowController {
     private func startWatching(perms: PermissionsService) {
         watchTask?.cancel()
         watchTask = Task { @MainActor in
+            var lastAccessibility = perms.accessibility
+            var lastInputMonitoring = perms.inputMonitoring
             while self.window?.isVisible == true {
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
+                // Announce each permission as it transitions to granted so a
+                // VoiceOver user gets audible progress, not just a silent relabel.
+                if perms.accessibility == .granted && lastAccessibility != .granted {
+                    self.announce("Accessibility granted.")
+                }
+                if perms.inputMonitoring == .granted && lastInputMonitoring != .granted {
+                    self.announce("Input Monitoring granted.")
+                }
+                lastAccessibility = perms.accessibility
+                lastInputMonitoring = perms.inputMonitoring
                 if perms.accessibility == .granted && perms.inputMonitoring == .granted {
+                    // Announce completion and let the on-screen success state be
+                    // seen for a beat before the window dismisses itself.
+                    self.announce("Setup complete. PointFocus is now active in your menu bar.")
+                    try? await Task.sleep(nanoseconds: 1_200_000_000)
                     self.window?.orderOut(nil)
                     break
                 }
             }
         }
+    }
+
+    private func announce(_ message: String) {
+        guard let window else { return }
+        NSAccessibility.post(
+            element: window,
+            notification: .announcementRequested,
+            userInfo: [
+                .announcement: message,
+                .priority: NSAccessibilityPriorityLevel.high.rawValue
+            ]
+        )
     }
 }
