@@ -50,6 +50,21 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(b.settings.overrides["com.apple.Safari"], FocusPoint(x: 0.2, y: 0.8))
     }
 
+    func testFlushPersistsImmediatelyWithoutWaitingForDebounce() {
+        let a = SettingsStore(defaults: defaults)
+        a.update {
+            $0.enabled = false
+            $0.overrides["com.apple.Mail"] = FocusPoint(x: 0.4, y: 0.6)
+        }
+        // No sleep: simulate quitting within the 200ms debounce window. flush()
+        // must persist synchronously so the change survives.
+        a.flush()
+
+        let b = SettingsStore(defaults: defaults)
+        XCTAssertFalse(b.settings.enabled)
+        XCTAssertEqual(b.settings.overrides["com.apple.Mail"], FocusPoint(x: 0.4, y: 0.6))
+    }
+
     func testMalformedPayloadFallsBackToDefaults() {
         defaults.set("this is not json".data(using: .utf8)!, forKey: "com.avb.pointfocus.v1")
         let store = SettingsStore(defaults: defaults)

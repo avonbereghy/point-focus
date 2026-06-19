@@ -29,16 +29,30 @@ final class SettingsStore {
         settings.overrides[bundleID] ?? settings.globalPoint
     }
 
+    /// Writes any pending debounced change immediately and synchronously. Call
+    /// on app termination so a setting changed within the debounce window isn't
+    /// silently lost when the scheduled write never gets to run.
+    func flush() {
+        guard pendingWrite != nil else { return }
+        pendingWrite?.cancel()
+        pendingWrite = nil
+        persist(settings)
+    }
+
     private func schedulePersist() {
         pendingWrite?.cancel()
         let snapshot = settings
         let work = DispatchWorkItem { [weak self] in
-            guard let self else { return }
-            if let data = try? JSONEncoder().encode(snapshot) {
-                self.defaults.set(data, forKey: Self.storageKey)
-            }
+            self?.pendingWrite = nil
+            self?.persist(snapshot)
         }
         pendingWrite = work
         DispatchQueue.main.asyncAfter(deadline: .now() + Self.debounceSeconds, execute: work)
+    }
+
+    private func persist(_ snapshot: Settings) {
+        if let data = try? JSONEncoder().encode(snapshot) {
+            defaults.set(data, forKey: Self.storageKey)
+        }
     }
 }
