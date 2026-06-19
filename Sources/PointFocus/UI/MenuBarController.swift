@@ -86,16 +86,29 @@ final class MenuBarController: NSObject {
 
     private func refreshIcon() {
         guard let button = statusItem.button else { return }
+        let permissionsMissing = perms.accessibility != .granted || perms.inputMonitoring != .granted
         let name: String
         let fallback: String
-        if perms.accessibility != .granted || perms.inputMonitoring != .granted {
+        if permissionsMissing {
             name = "exclamationmark.triangle"
             fallback = "PF!"
         } else {
             name = "scope"
             fallback = "PF"
         }
-        if let image = NSImage(systemSymbolName: name, accessibilityDescription: name) {
+
+        // A human description of the current state for VoiceOver, rather than the
+        // raw SF Symbol name ("scope" / "exclamationmark.triangle").
+        let stateDescription: String
+        if permissionsMissing {
+            stateDescription = "Permissions required"
+        } else if !store.settings.enabled {
+            stateDescription = "Disabled"
+        } else {
+            stateDescription = "Active"
+        }
+
+        if let image = NSImage(systemSymbolName: name, accessibilityDescription: "PointFocus — \(stateDescription)") {
             image.isTemplate = true
             button.image = image
             button.title = ""
@@ -104,6 +117,8 @@ final class MenuBarController: NSObject {
             button.title = fallback
         }
         button.appearsDisabled = !store.settings.enabled
+        button.setAccessibilityLabel("PointFocus")
+        button.setAccessibilityValue(stateDescription)
     }
 
     private func startObservation() {
