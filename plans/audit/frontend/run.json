@@ -1,0 +1,39 @@
+{
+  "run": "frontend-quality-sweep",
+  "base_commit": "c9d1df2159095c83117f34c66f8c765e929a53e1",
+  "head_commit": "78f9631",
+  "n": 4,
+  "scope": "Sources/PointFocus/UI/**",
+  "focus": null,
+  "severity": "medium",
+  "lenses": ["reliability", "correctness", "a11y", "ux-polish"],
+  "lenses_dropped": [
+    "security (no network/web/untrusted-content surface in local menu-bar UI)",
+    "performance (no animation/timer hot path; tiny re-render surface)",
+    "types (no force-unwraps/as!/try! in UI)",
+    "bundle/build/deps (no bundler; system frameworks only)",
+    "routing/i18n/forms-lib/electron/pwa (subsystem absent)",
+    "tests (no UI test target)"
+  ],
+  "stack": "Swift 6 + SwiftUI + AppKit (SwiftPM executable)",
+  "started_at": "2026-06-19T15:10:00Z",
+  "completed_at": "2026-06-19T15:40:00Z",
+  "status": "complete",
+  "findings": { "total": 21, "critical": 0, "high": 5, "medium": 15, "low": 1, "in_scope": 20, "fixed": 20, "deferred": 1, "false_positives": 0 },
+  "tracks": [
+    { "name": "A — Picker", "commit": "d0c93d2", "files": ["UI/Picker/PickerCoordinator.swift", "UI/Picker/PickerOverlayView.swift"], "findings": ["F-reliability-001", "F-reliability-004", "F-a11y-001", "F-a11y-002", "F-ux-polish-002", "F-ux-polish-003"] },
+    { "name": "B — Settings", "commit": "894a137", "files": ["UI/SettingsView.swift", "UI/AppOverrideRow.swift"], "findings": ["F-reliability-002", "F-correctness-002", "F-ux-polish-001", "F-ux-polish-003", "F-ux-polish-004", "F-a11y-003", "F-a11y-004", "F-a11y-005"] },
+    { "name": "C — Onboarding", "commit": "ac344de", "files": ["UI/OnboardingView.swift", "UI/OnboardingWindowController.swift"], "findings": ["F-correctness-001", "F-reliability-003", "F-ux-polish-005", "F-ux-polish-006", "F-a11y-003", "F-a11y-007"] },
+    { "name": "D — Menu bar", "commit": "78f9631", "files": ["UI/MenuBarController.swift"], "findings": ["F-a11y-006"] }
+  ],
+  "deferred": ["F-correctness-003 (low; rendered moot by Track B observable-toggle fix)"],
+  "out_of_scope_noted": ["multi-monitor pickGlobal single-display capture", "NSWorkspace disk lookups inside AppOverrideRow.body", "1 Hz permission polling cadence"],
+  "verification": {
+    "swift_build_debug": "pass",
+    "swift_test": "14/14 pass",
+    "diff_scoped": "7 of 8 matrix files (PickerOverlayWindow needed no change); no drive-bys",
+    "matrix_held": "no file in >1 commit",
+    "no_findings_silenced": "no suppressions added; single accessibilityHidden is on a decorative icon",
+    "diffstat": "7 files, +313 -59"
+  }
+}

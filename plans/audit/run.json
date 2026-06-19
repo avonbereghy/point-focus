@@ -1,0 +1,99 @@
+{
+  "base_commit": "7c9eb62a84479d033ef91f2f2aefeeccc0346596",
+  "n": 5,
+  "scope": "backend Swift (Services/, Models/, AppDelegate.swift, main.swift) + build.sh",
+  "focus": null,
+  "severity": "medium",
+  "lenses": [
+    "security",
+    "reliability",
+    "correctness",
+    "types",
+    "dx"
+  ],
+  "lenses_dropped": [
+    "deps",
+    "db",
+    "api",
+    "prompts",
+    "performance",
+    "observability",
+    "tests"
+  ],
+  "lens_status": {
+    "security": "done",
+    "reliability": "done",
+    "correctness": "done",
+    "types": "done",
+    "dx": "done"
+  },
+  "started_at": "2026-06-19T21:14:45Z",
+  "completed_at": "2026-06-19T21:30:00Z",
+  "head_commit": "c9d1df2",
+  "tracks": {
+    "track1_event_warp_pipeline": {
+      "status": "done",
+      "commit": "76623d4",
+      "findings": [
+        "F-correctness-001",
+        "F-correctness-002",
+        "F-reliability-001",
+        "F-reliability-002",
+        "F-reliability-003",
+        "F-types-003",
+        "F-security-003",
+        "F-dx-001",
+        "F-dx-002",
+        "F-dx-003",
+        "F-dx-004",
+        "F-dx-005",
+        "F-dx-006"
+      ]
+    },
+    "track2_ax_probe_safety": {
+      "status": "done",
+      "commit": "e1d009d",
+      "findings": [
+        "F-types-001",
+        "F-types-002",
+        "F-correctness-003"
+      ]
+    },
+    "track3_settings_durability": {
+      "status": "done",
+      "commit": "da28af3",
+      "findings": [
+        "F-reliability-004"
+      ]
+    },
+    "track4_launch_typed_errors": {
+      "status": "done",
+      "commit": "2f569d4",
+      "findings": [
+        "F-types-004"
+      ]
+    },
+    "track5_build_script": {
+      "status": "done",
+      "commit": "c9d1df2",
+      "findings": [
+        "F-security-001",
+        "F-security-002",
+        "F-reliability-006"
+      ]
+    }
+  },
+  "verification": {
+    "build": "pass (debug+release)",
+    "tests": "14/14 pass (+1 new)",
+    "diff_scoped": true,
+    "matrix_held": true,
+    "no_silenced_findings": true
+  },
+  "deferred": [
+    "F-reliability-005",
+    "F-correctness-004",
+    "F-correctness-005",
+    "F-dx-007 (README \u2014 user declined)"
+  ]
+}

@@ -1,0 +1,8 @@
+Sources/PointFocus/UI/MenuBarController.swift
+Sources/PointFocus/UI/SettingsView.swift
+Sources/PointFocus/UI/AppOverrideRow.swift
+Sources/PointFocus/UI/OnboardingView.swift
+Sources/PointFocus/UI/OnboardingWindowController.swift
+Sources/PointFocus/UI/Picker/PickerCoordinator.swift
+Sources/PointFocus/UI/Picker/PickerOverlayView.swift
+Sources/PointFocus/UI/Picker/PickerOverlayWindow.swift
