@@ -5,6 +5,9 @@ import CoreGraphics
 enum CursorWarpService {
     static func warp(to quartzTopLeftPoint: CGPoint) {
         let target = clampToDisplays(quartzTopLeftPoint)
+        if target != quartzTopLeftPoint {
+            PFLog.warp.debug("requested point off-screen; clamped to (\(target.x), \(target.y))")
+        }
         CGWarpMouseCursorPosition(target)
         CGAssociateMouseAndMouseCursorPosition(1)
     }
