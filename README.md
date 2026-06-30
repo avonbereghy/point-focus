@@ -68,4 +68,13 @@ Remove the Accessibility and Input Monitoring entries from **System Settings →
 
 ## Architecture
 
-See [`specs/point_focus.spec.md`](specs/point_focus.spec.md) for the full feature spec and [`plans/point_focus_agent_plan.md`](plans/point_focus_agent_plan.md) for the layered architecture and wave-by-wave build plan.
+The source is organized in layers under `Sources/PointFocus/`:
+
+- **`Models/`** — value types (`FocusPoint`, `Settings`).
+- **`Services/`** — the input → probe → warp pipeline (`EventTapService`, `FocusedWindowProbe`, `FocusRouter`, `CursorWarpService`), plus persistence (`SettingsStore`), permissions, launch-at-login, and logging.
+- **`UI/`** — SwiftUI views (settings popover, onboarding, on-screen picker) hosted in AppKit (`MenuBarController`).
+- **`AppDelegate.swift` / `main.swift`** — app lifecycle and wiring.
+
+## License
+
+Released under the [MIT License](LICENSE).
