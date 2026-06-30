@@ -8,10 +8,22 @@ enum FocusedWindowProbe {
         let frame: CGRect
     }
 
+    // AX reads are synchronous cross-process IPC; without an explicit timeout
+    // they block on the *default* AX timeout (historically ~6s) when the target
+    // app is hung. Because the probe runs on @MainActor — the run loop hosting
+    // the CGEventTap — a stalled read would freeze Cmd+Tab detection. Cap each
+    // read well under the probe's ~300ms budget so a hung app degrades to "no
+    // warp" instead of stalling the main thread.
+    private static let axTimeout: Float = 0.1
+
     static func current() -> Result? {
         // Preferred path: system-wide focused app → focused window. Works for
         // native Cocoa apps.
         let sys = AXUIElementCreateSystemWide()
+        // Setting the timeout on the system-wide element makes it the default
+        // for elements that don't set their own (covers the focused-app and
+        // window elements derived below).
+        AXUIElementSetMessagingTimeout(sys, axTimeout)
         var appRef: CFTypeRef?
         if AXUIElementCopyAttributeValue(sys, kAXFocusedApplicationAttribute as CFString, &appRef) == .success,
            let appElement = asElement(appRef),
@@ -25,7 +37,11 @@ enum FocusedWindowProbe {
         // either of these (certain Rust/Tauri apps) are undetectable without
         // Screen Recording permission — treated as out of scope.
         if let frontPID = NSWorkspace.shared.frontmostApplication?.processIdentifier {
-            return resolve(app: AXUIElementCreateApplication(frontPID))
+            // Freshly created application elements don't inherit the system-wide
+            // default, so set the timeout explicitly on this one too.
+            let appElement = AXUIElementCreateApplication(frontPID)
+            AXUIElementSetMessagingTimeout(appElement, axTimeout)
+            return resolve(app: appElement)
         }
         return nil
     }

@@ -4,3 +4,6 @@ build/
 *.xcuserstate
 xcuserdata/
 .DS_Store
+
+# Local audit/planning artifacts — not part of the published project
+plans/
